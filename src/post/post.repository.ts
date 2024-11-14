@@ -6,7 +6,7 @@ import { PostAttributes } from 'src/utils/model/post.model';
 export class PostRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createPost(req: PostAttributes): Promise<void> {
+  async createPostRepository(req: PostAttributes): Promise<void> {
     await this.prismaService.posts.create({
       data: {
         title: req.title,
@@ -21,4 +21,30 @@ export class PostRepository {
       },
     });
   }
+
+  async getPostsRepository(search: string | undefined) {
+    let result = [];
+    if (search) {
+      result = await this.prismaService.posts.findMany({
+        where: {
+          title: {
+            contains: search, // Similar to Op.like in Sequelize
+            // mode: 'insensitive', // Optional: makes the search case-insensitive
+          },
+        },
+        include: {
+          user: true, // This will include the associated user model
+        },
+      });
+      
+    } else {
+      result = await this.prismaService.posts.findMany({
+        include: {
+          user: true, // Includes the associated User model
+        },
+      });
+    }
+    return result;
+  }
+  
 }

@@ -12,14 +12,25 @@ export class PostService {
     private postRepository: PostRepository
   ){}
 
-  async handleCreatePost(req: PostAttributes, userId: number) {
+  async createPost(req: PostAttributes, userId: number) {
+    console.log("req:",req)
     try {
       // Create the post
       this.validationService.validate(PostValidation.PostValidationSchema, req);
-      await this.postRepository.createPost(req);
+      await this.postRepository.createPostRepository(req);
     } catch (err) {
       handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async getPosts(search: string): Promise<any> {
+    try {
+      const posts = await this.postRepository.getPostsRepository(search);
+      return posts
+    } catch (err) {
+      throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
 }
