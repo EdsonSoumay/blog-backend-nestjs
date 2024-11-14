@@ -22,7 +22,7 @@ export class PostRepository {
     });
   }
 
-  async getPostsRepository(search: string | undefined) {
+  async getPostsRepository(search: string | undefined): Promise<any[]> {
     let result = [];
     if (search) {
       result = await this.prismaService.posts.findMany({
@@ -46,5 +46,21 @@ export class PostRepository {
     }
     return result;
   }
-  
+
+  async getPostRepositoryById(id: number): Promise<void>{
+   await this.prismaService.posts.findUnique({where:{id}})
+  }
+
+  async updatePostRepositoryById (id:number, value: PostAttributes): Promise<void> {
+    await this.prismaService.posts.update({
+      where: {id},
+      data: {
+        title: value.title,
+        desc: value.desc,
+        user_id: value.user_id,
+        category_id: value.category_id,
+        photo: value.photo
+      },
+    });
+  }
 }

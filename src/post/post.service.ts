@@ -12,8 +12,7 @@ export class PostService {
     private postRepository: PostRepository
   ){}
 
-  async createPost(req: PostAttributes, userId: number) {
-    console.log("req:",req)
+  async createPostService(req: PostAttributes, userId: number) {
     try {
       // Create the post
       this.validationService.validate(PostValidation.PostValidationSchema, req);
@@ -24,7 +23,19 @@ export class PostService {
     }
   }
 
-  async getPosts(search: string): Promise<any> {
+  async editPostService(req: PostAttributes, postId: number) {
+    try {
+      // Create the post
+      this.validationService.validate(PostValidation.PostValidationSchema, req);
+      // const getPreviousPost = await this.postRepository.getPostRepositoryById(postId);
+      const updatePost = await this.postRepository.updatePostRepositoryById(postId, req);
+    } catch (err) {
+      handleValidationError(err)
+      throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getPostsService(search: string): Promise<any> {
     try {
       const posts = await this.postRepository.getPostsRepository(search);
       return posts
