@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { UserRequest } from 'src/model/user.model';
-
-
+import { LoginUserAttributes } from 'src/utils/model/user.model';
 
 @Injectable()
 export class JwtService {
@@ -27,20 +25,20 @@ export class JwtService {
   }
 
   // Method untuk mengekstrak data dari token biasa
-  extractToken(token: string): UserRequest | null {
+  extractToken(token: string): LoginUserAttributes | null {
     try {
       const decoded = jwt.verify(token, this.jwtSecretKey);
-      return decoded as UserRequest;  // Cast ke tipe UserData
+      return decoded as LoginUserAttributes;  // Cast ke tipe UserData
     } catch (error) {
       return null;  // Mengembalikan null jika verifikasi gagal
     }
   }
 
   // Method untuk mengekstrak data dari refresh token
-  extractRefreshToken(token: string): UserRequest | null {
+  extractRefreshToken(token: string): LoginUserAttributes | null {
     try {
       const decoded = jwt.verify(token, this.jwtRefreshTokenSecretKey);
-      return decoded as UserRequest;  // Cast ke tipe UserData
+      return decoded as LoginUserAttributes;  // Cast ke tipe UserData
     } catch (error) {
       return null;  // Mengembalikan null jika verifikasi gagal
     }

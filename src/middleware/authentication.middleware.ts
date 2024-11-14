@@ -16,7 +16,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
   
   async use(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     const token = req.cookies.token;
-    console.log("token di middleware:",token)
+    // console.log("Token Di Middleware:",token)
     if (!token) {
       throw new HttpException({ message: 'You are not authenticated!' }, HttpStatus.UNAUTHORIZED);
     }

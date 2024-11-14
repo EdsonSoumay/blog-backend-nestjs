@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UserRequest, RegisterUserRequest } from '../model/user.model';
+import { LoginUserAttributes, RegisterUserAttributes } from '../utils/model/user.model';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as bcrypt from 'bcrypt';
 import { ValidationService } from 'src/common/validation/validation.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UserValidation } from './auth.validation';
+import { UserValidation } from '../utils/helpers/validationSchema.helpers';
 import { JwtService } from 'src/common/jwt/jwt.service';
-import { ValidationError } from 'yup';
+import { handleValidationError } from 'src/utils/helpers/validationException.helpers';
 
 @Injectable()
 export class AuthService {
@@ -18,10 +18,10 @@ export class AuthService {
     private readonly jwtService: JwtService, // use the custom JwtService
   ) {}
 
-  async register(request: RegisterUserRequest): Promise<void> {
+  async register(request: RegisterUserAttributes): Promise<void> {
     try {
       this.logger.debug(`Register new user ${JSON.stringify(request)}`);
-      const registerRequest: RegisterUserRequest = this.validationService.validate(UserValidation.REGISTER, request);
+      const registerRequest: RegisterUserAttributes = this.validationService.validate(UserValidation.registerSchema, request);
   
       // Periksa apakah username atau email sudah ada
       const totalUserWithSameUsernameAndEmail = await this.prismaService.users.count({
@@ -44,25 +44,14 @@ export class AuthService {
       });
     } catch (err) {
       // Handle Yup validation errors
-      if (err instanceof ValidationError) {
-        throw new HttpException({
-          message: 'Validation failed, check your info again',
-          details: err.errors, // Yup menyimpan semua error dalam array
-        }, HttpStatus.BAD_REQUEST);
-      }
-
-      // Handle HttpExceptions that were already thrown
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
+      handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async login(request: UserRequest): Promise<any> {
+  async login(request: LoginUserAttributes): Promise<any> {
     try {
-      const loginRequest: UserRequest = this.validationService.validate(UserValidation.LOGIN, request);
+      const loginRequest: LoginUserAttributes = this.validationService.validate(UserValidation.loginSchema, request);
 
       const { username, password } = loginRequest;
 
@@ -94,19 +83,7 @@ export class AuthService {
         }
       };
     } catch (err) {
-       // Handle Yup validation errors
-       if (err instanceof ValidationError) {
-        throw new HttpException({
-          message: 'Validation failed, check your info again',
-          details: err.errors, // Yup menyimpan semua error dalam array
-        }, HttpStatus.BAD_REQUEST);
-      }
-
-      // Handle HttpExceptions that were already thrown
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
+      handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

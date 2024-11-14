@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserRequest, RegisterUserRequest } from '../model/user.model';
+import { LoginUserAttributes, RegisterUserAttributes } from '../utils/model/user.model';
 import { Response, Request } from 'express';
 
 @Controller('/api/auth')
@@ -11,7 +11,9 @@ export class AuthController {
  
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() request: RegisterUserRequest): Promise<{ message: string }> {
+  async register(
+    @Body() request: RegisterUserAttributes)
+    : Promise<{ message: string }> {
     
     await this.authService.register(request); // Panggil logika di service
     return {
@@ -21,7 +23,10 @@ export class AuthController {
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() request: UserRequest,@Res() res: Response): Promise<void> { 
+  async login(
+    @Body() request: LoginUserAttributes,
+    @Res() res: Response
+    ): Promise<void> { 
     const { user, token, refreshToken } = await this.authService.login(request);
     res.cookie('token', token, { httpOnly: true })
     .cookie('refreshToken', refreshToken, { httpOnly: true })

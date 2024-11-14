@@ -1,4 +1,4 @@
-export class RegisterUserRequest {
+export class RegisterUserAttributes {
   username: string;
   password: string;
   first_name: string;
@@ -6,7 +6,7 @@ export class RegisterUserRequest {
   email: string;
 }
 
-export class UserRequest {
+export class LoginUserAttributes {
   id?: number
   username: string;
   password: string;
