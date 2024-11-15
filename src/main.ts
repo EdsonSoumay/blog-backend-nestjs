@@ -3,10 +3,12 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import  morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import { SocketService } from './common/socket/socket.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const socketService = app.get(SocketService);
   const urlFrontend = configService.get<string>('URL_FRONT_END') || 'http://localhost:3000';
   app.use(cookieParser());
   app.use(morgan('dev'));
@@ -16,6 +18,8 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization', // Header yang diizinkan
     credentials: true, // Untuk mengizinkan cookies dan kredensial
   });
+
+  socketService.onModuleInit();
 
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port);

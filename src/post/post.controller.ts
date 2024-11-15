@@ -26,7 +26,7 @@ export class PostController {
     ): Promise<{ message: string }> {
     const userId = req?.user_id;
     const postId = parseInt(id)
-    await this.postService.editPostService(req, postId);
+    await this.postService.editPostService(req, postId, userId);
     return {
       message: 'Successfully update post',
     };
@@ -62,11 +62,26 @@ export class PostController {
   @HttpCode(HttpStatus.OK)
   async deletePost(
     @Param('id') id: string,
+    @Body() req: PostAttributes, 
   ): Promise<{ message: string }> {
     const postId = parseInt(id)
-    const result = await this.postService.deletePostService(postId);
+    const userId = req?.user_id;
+    await this.postService.deletePostService(postId, userId);
     return {
       message: 'Successfully delete post',
+    };
+  }
+
+  @Get('/user/:user_id')
+  @HttpCode(HttpStatus.OK)
+  async getPostsByUser(
+    @Param('user_id') user_id: string,
+  ): Promise<{ message: string, data: PostAttributes | null }> {
+    const userID = parseInt(user_id)
+    const result = await this.postService.getPostsByUserService(userID);
+    return {
+      message: 'Successfully get posts by user',
+      data: result
     };
   }
 }

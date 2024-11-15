@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ValidationService } from './validation/validation.service';
 import { ExceptionService } from './exception/exception.service';
 import { JwtService } from './jwt/jwt.service';
+import { SocketService } from './socket/socket.service';
 
 @Global()
 @Module({
@@ -20,8 +21,8 @@ import { JwtService } from './jwt/jwt.service';
       isGlobal: true,
     }),
   ],
-  providers: [PrismaService, ValidationService, ExceptionService, JwtService],
-  exports:[PrismaService, ValidationService, ExceptionService, JwtService]
+  providers: [PrismaService, ValidationService, ExceptionService, JwtService, SocketService],
+  exports:[PrismaService, ValidationService, ExceptionService, JwtService, SocketService]
 })
 
 export class CommonModule {}

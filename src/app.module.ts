@@ -8,6 +8,7 @@ import { UploadFileMiddleware } from './middleware/uploadFile.middleware';
 import { FileController } from './file/file.controller';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { NextFunction, Response, Request } from 'express';
 
 @Module({
   imports: [
@@ -27,11 +28,23 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthenticationMiddleware)
-      .exclude('api/auth/login', 'api/auth/signup')
+      .exclude('api/auth/login', 'api/auth/register')
       .forRoutes('/images/*', 'api/*'); 
     
     consumer
       .apply(UploadFileMiddleware)
       .forRoutes('/api/upload'); // Apply UploadFileMiddleware
-  }
+  
+    // Tambahkan Middleware untuk menangkap error
+    consumer
+    .apply((req:Request, res: Response, next: NextFunction) => {
+      res.on('finish', () => {
+        if (res.statusCode === 404) {
+          console.error(`Static file not found: ${req.originalUrl}`);
+        }
+      });
+      next();
+    })
+    .forRoutes('*');
+ }
 }
