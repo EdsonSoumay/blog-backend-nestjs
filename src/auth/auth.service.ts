@@ -58,13 +58,13 @@ export class AuthService {
       // Check if user exists
       const user = await this.prismaService.users.findFirst({where: { username }});
       if (!user) {
-        throw new HttpException({ message: 'User not found' }, 404);
+        throw new HttpException({ message: 'User not found' }, HttpStatus.NOT_FOUND);
       }
 
       // Compare passwords
       const matched = await bcrypt.compare(password, user.password);
       if (!matched) {
-        throw new HttpException({ message: 'Wrong credentials!' }, 401);
+        throw new HttpException({ message: 'Wrong credentials!' }, HttpStatus.UNAUTHORIZED);
       }
 
       const payload = {id: user.id, username: user.username};

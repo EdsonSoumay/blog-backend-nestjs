@@ -47,13 +47,13 @@ export class PostRepository {
     return result;
   }
 
-  async getPostRepositoryById(id: number): Promise<void>{
-   await this.prismaService.posts.findUnique({where:{id}})
+  async getPostRepositoryById(postId: number): Promise<PostAttributes>{
+   return await this.prismaService.posts.findUnique({where:{id:postId}})
   }
 
-  async updatePostRepositoryById (id:number, value: PostAttributes): Promise<void> {
+  async updatePostRepositoryById (postId:number, value: PostAttributes): Promise<void> {
     await this.prismaService.posts.update({
-      where: {id},
+      where: {id:postId},
       data: {
         title: value.title,
         desc: value.desc,
@@ -62,5 +62,9 @@ export class PostRepository {
         photo: value.photo
       },
     });
+  }
+
+  async deletePostRepositoryById(postId:number): Promise<void>{
+     await this.prismaService.posts.delete({where:{id:postId}})
   }
 }

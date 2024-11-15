@@ -37,7 +37,6 @@ export class AuthController {
   @HttpCode(200)
   async refetch(@Req() req: Request, @Res() res: Response): Promise<void> {
     try {
-      console.log("refetch")
       const refreshToken = req.cookies.refreshToken;
       const { user, newToken } = await this.authService.refetch(refreshToken); // Menggunakan refresh token
 
