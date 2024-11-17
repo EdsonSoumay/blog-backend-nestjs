@@ -41,7 +41,7 @@ model Posts {
   updatedAt   DateTime   @updatedAt
 
   user        Users      @relation(fields: [user_id], references: [id])
-  category    Categories @relation(fields: [category_id], references: [id])
+  category    Categories @relation(fields: [category_id], references: [id], onDelete: Cascade)
   comments    Comments[]
 }
 

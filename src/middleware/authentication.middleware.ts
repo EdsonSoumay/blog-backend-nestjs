@@ -24,7 +24,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
     try {
       const decoded = this.jwtService.extractToken(token);
     
-      const user = await this.userRepository.findUserById(decoded.id);
+      const user = await this.userRepository.findUserByIdRepository(decoded.id);
       if (!user) {
         return res
           .clearCookie('token', { sameSite: 'none', secure: true })

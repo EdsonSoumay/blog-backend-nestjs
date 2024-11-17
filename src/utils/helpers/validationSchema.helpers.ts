@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 export class UserValidation {
-  static readonly registerSchema = yup.object().shape({
+  static readonly userValidationSchema = yup.object().shape({
     username: yup.string().required().min(1).max(100),
     last_name: yup.string().required().min(1).max(100),
     first_name: yup.string().required().min(1).max(100),
@@ -22,5 +22,12 @@ export class PostValidation {
     user_id: yup.number().required(),
     category_id: yup.number().required(),
     photo: yup.string().nullable()
+  });
+}
+
+
+export class CategoryValidation {
+  static readonly CategoryValidationSchema = yup.object().shape({
+    category_description: yup.string().required().min(1).max(100),
   });
 }

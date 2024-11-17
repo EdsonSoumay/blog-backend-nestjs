@@ -7,6 +7,7 @@ import { ValidationService } from './validation/validation.service';
 import { ExceptionService } from './exception/exception.service';
 import { JwtService } from './jwt/jwt.service';
 import { SocketService } from './socket/socket.service';
+import { BcryptService } from './bcrypt/bcrypt.service';
 
 @Global()
 @Module({
@@ -21,8 +22,8 @@ import { SocketService } from './socket/socket.service';
       isGlobal: true,
     }),
   ],
-  providers: [PrismaService, ValidationService, ExceptionService, JwtService, SocketService],
-  exports:[PrismaService, ValidationService, ExceptionService, JwtService, SocketService]
+  providers: [PrismaService, ValidationService, ExceptionService, JwtService, SocketService, BcryptService],
+  exports:[PrismaService, ValidationService, ExceptionService, JwtService, SocketService, BcryptService]
 })
 
 export class CommonModule {}

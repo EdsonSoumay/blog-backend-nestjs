@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { LoginUserAttributes, RegisterUserAttributes } from '../utils/model/user.model';
+import { LoginUserAttributes, UserAttributes } from '../utils/model/user.model';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { UserValidation } from '../utils/helpers/validationSchema.helpers';
 import { JwtService } from 'src/common/jwt/jwt.service';
 import { handleValidationError } from 'src/utils/helpers/validationException.helpers';
+import { BcryptService } from 'src/common/bcrypt/bcrypt.service';
 
 @Injectable()
 export class AuthService {
@@ -15,13 +16,14 @@ export class AuthService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
-    private readonly jwtService: JwtService, // use the custom JwtService
+    private readonly jwtService: JwtService,
+    private bcryptService: BcryptService
   ) {}
 
-  async register(request: RegisterUserAttributes): Promise<void> {
+  async register(request: UserAttributes): Promise<void> {
     try {
       this.logger.debug(`Register new user ${JSON.stringify(request)}`);
-      const registerRequest: RegisterUserAttributes = this.validationService.validate(UserValidation.registerSchema, request);
+      const registerRequest: UserAttributes = this.validationService.validate(UserValidation.userValidationSchema, request);
   
       // Periksa apakah username atau email sudah ada
       const totalUserWithSameUsernameAndEmail = await this.prismaService.users.count({
@@ -37,7 +39,7 @@ export class AuthService {
         throw new HttpException({ message: 'Duplicate user or email'}, HttpStatus.CONFLICT);
       }
   
-      registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
+      registerRequest.password = await this.bcryptService.PasswordHashing(registerRequest.password)
   
       await this.prismaService.users.create({
         data: registerRequest,
@@ -62,7 +64,7 @@ export class AuthService {
       }
 
       // Compare passwords
-      const matched = await bcrypt.compare(password, user.password);
+      const matched = await this.bcryptService.PasswordCompare(password, user.password)
       if (!matched) {
         throw new HttpException({ message: 'Wrong credentials!' }, HttpStatus.UNAUTHORIZED);
       }

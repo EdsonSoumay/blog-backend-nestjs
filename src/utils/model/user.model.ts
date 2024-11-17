@@ -1,4 +1,4 @@
-export class RegisterUserAttributes {
+export class UserAttributes {
   username: string;
   password: string;
   first_name: string;

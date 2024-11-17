@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserAttributes, RegisterUserAttributes } from '../utils/model/user.model';
+import { LoginUserAttributes, UserAttributes } from '../utils/model/user.model';
 import { Response, Request } from 'express';
 
 @Controller('/api/auth')
@@ -12,8 +12,8 @@ export class AuthController {
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body() request: RegisterUserAttributes)
-    : Promise<{ message: string }> {
+    @Body() request: UserAttributes
+  ): Promise<{ message: string }> {
     
     await this.authService.register(request); // Panggil logika di service
     return {
