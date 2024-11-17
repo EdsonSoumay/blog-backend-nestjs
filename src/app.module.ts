@@ -9,8 +9,9 @@ import { FileController } from './file/file.controller';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { NextFunction, Response, Request } from 'express';
-// import { RedisModule } from './redis/redis.module';
+import { RedisModule } from './redis/redis.module';
 import { CategoryModule } from './category/category.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -22,8 +23,9 @@ import { CategoryModule } from './category/category.module';
       rootPath: join(__dirname, '..', 'public', 'images'), // Ganti ke folder yang benar
       serveRoot: '/images', // Prefix untuk akses gambar
     }),
-    // RedisModule,
+    RedisModule,
     CategoryModule,
+    CommentModule,
   ],
   providers: [],
   controllers: [FileController],
