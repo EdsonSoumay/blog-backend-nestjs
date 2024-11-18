@@ -5,8 +5,7 @@ import { ObjectSchema } from 'yup';
 export class ValidationService {
   validate<T>(schema: ObjectSchema<T>, data: unknown): T {
     try {
-      // Use `unknown` for input data to validate against the schema and cast the output
-      return schema.validateSync(data, { abortEarly: false }) as T; 
+      return schema.validateSync(data, { abortEarly: false, strict: true }) as T; // strict: true agar tipe data harus sesuai yang didefinisikan
     } catch (error) {
       throw error;
     }

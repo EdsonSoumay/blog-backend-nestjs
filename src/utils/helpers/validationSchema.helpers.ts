@@ -25,9 +25,16 @@ export class PostValidation {
   });
 }
 
-
 export class CategoryValidation {
   static readonly CategoryValidationSchema = yup.object().shape({
     category_description: yup.string().required().min(1).max(100),
+  });
+}
+
+export class CommentValidation {
+  static readonly CommentValidationSchema = yup.object().shape({
+    comment: yup.string().required().min(1).max(100),
+    post_id: yup.number().required(),
+    user_id: yup.number().required(),
   });
 }
