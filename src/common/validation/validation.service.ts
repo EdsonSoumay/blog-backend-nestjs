@@ -10,4 +10,15 @@ export class ValidationService {
       throw error;
     }
   }
+
+  convert<T>(schema: ObjectSchema<T>, data: unknown): T {
+    try {
+      // Gunakan Yup untuk transformasi data
+      return schema.cast(data, {
+        stripUnknown: true, // Hapus properti yang tidak dikenal
+      }) as T;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
