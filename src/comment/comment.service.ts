@@ -17,11 +17,11 @@ export class CommentService {
   async createCommentService(req: CommentAttributes) {
     try {
       const convertedData = this.validationService.convert(CommentValidation.CommentValidationSchema, req);
-      const validationData = this.validationService.validate(CommentValidation.CommentValidationSchema, convertedData);
+      const validatedData = this.validationService.validate(CommentValidation.CommentValidationSchema, convertedData);
     
-      await this.commentRepository.createCommentRepository(validationData);
+      await this.commentRepository.createCommentRepository(validatedData);
  
-      const postId = validationData.post_id
+      const postId = validatedData.post_id
       if(postId){
         const result = await this.commentRepository.getCommentsByPostRepository(postId);
         this.socketService.emitEventToRoom(`postId-${postId}`, `${postId}-all-comments`, result);

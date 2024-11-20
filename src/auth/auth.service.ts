@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { LoginUserAttributes, UserAttributes } from '../utils/model/user.model';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import * as bcrypt from 'bcrypt';
 import { ValidationService } from 'src/common/validation/validation.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { UserValidation } from '../utils/helpers/validationSchema.helpers';
@@ -28,10 +27,7 @@ export class AuthService {
       // Periksa apakah username atau email sudah ada
       const totalUserWithSameUsernameAndEmail = await this.prismaService.users.count({
         where: {
-          OR: [
-            { username: registerRequest.username },
-            { email: registerRequest.email },
-          ],
+          OR: [{ username: registerRequest.username },{ email: registerRequest.email }],
         },
       });
   
@@ -45,7 +41,6 @@ export class AuthService {
         data: registerRequest,
       });
     } catch (err) {
-      // Handle Yup validation errors
       handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }

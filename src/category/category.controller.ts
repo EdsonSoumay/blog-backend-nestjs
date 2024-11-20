@@ -1,6 +1,6 @@
 import { CategoryAttributes } from 'src/utils/model/category.model';
 import { CategoryService } from './category.service';
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Query, Put, Param, Delete} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Query, Put, Param, Delete, ParseIntPipe} from '@nestjs/common';
 
 @Controller('/api/category')
 export class CategoryController {
@@ -30,10 +30,9 @@ export class CategoryController {
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
   async deletePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number, 
   ): Promise<{ message: string }> {
-    const categoryId = parseInt(id)
-    await this.categoryService.deleteCategoryService(categoryId);
+    await this.categoryService.deleteCategoryService(id);
     return {
       message: 'Successfully delete category',
     };

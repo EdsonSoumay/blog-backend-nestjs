@@ -6,7 +6,7 @@ import { UserAttributes } from 'src/utils/model/user.model';
 export class UserRepository {
   constructor(private prismaService: PrismaService) {}
 
-  async findUserByIdRepository(id: number): Promise<any> {
+  async getUserByIdRepository(id: number): Promise<any> {
     return await this.prismaService.users.findUnique({ where: { id } });
   }
 

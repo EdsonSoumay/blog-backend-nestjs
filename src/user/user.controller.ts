@@ -1,4 +1,4 @@
-import { Controller, Get, Param, HttpCode, Put, HttpStatus, Body, Delete } from '@nestjs/common';
+import { Controller, Get, Param, HttpCode, Put, HttpStatus, Body, Delete, ParseIntPipe } from '@nestjs/common';
 import { UserAttributes } from 'src/utils/model/user.model';
 import { UserService } from './user.service';
 
@@ -11,25 +11,22 @@ export class UserController {
   @Get('/:id')
   @HttpCode(HttpStatus.OK)
   async getUser(
-    @Param('id') id: string, 
+    @Param('id', ParseIntPipe) id: number, 
     ): Promise<{ message: string, data: UserAttributes}> {
-    const IdInt = parseInt(id)
-    const user = await this.userService.getUserService(IdInt);
+    const user = await this.userService.getUserService(id);
     return {
         message: 'successfuly get user',
         data: user
     };
   }
 
-  //ini belum di testing
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
   async editUser(
-    @Param('id') id: string, 
+    @Param('id', ParseIntPipe) id: number, 
     @Body() req: UserAttributes
     ): Promise<{ message: string}> {
-    const IdInt = parseInt(id)
-    await this.userService.editUserService(req, IdInt)
+    await this.userService.editUserService(req, id)
     return {
         message: 'successfuly update user',
     };
@@ -40,10 +37,9 @@ export class UserController {
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
   async deleteUser(
-    @Param('id') id: string, 
+    @Param('id', ParseIntPipe) id: number, 
     ): Promise<{ message: string}> {
-    const IdInt = parseInt(id)
-    await this.userService.deleteUserService(IdInt)
+    await this.userService.deleteUserService(id)
     return {
         message: 'successfuly delete user',
     };

@@ -27,10 +27,14 @@ export class AuthController {
     @Body() request: LoginUserAttributes,
     @Res() res: Response
     ): Promise<void> { 
-    const { user, token, refreshToken } = await this.authService.login(request);
-    res.cookie('token', token, { httpOnly: true })
-    .cookie('refreshToken', refreshToken, { httpOnly: true })
-		.send({ message: 'Succesfully login', data: user})
+    try {
+      const { user, token, refreshToken } = await this.authService.login(request);
+      res.cookie('token', token, { httpOnly: true })
+      .cookie('refreshToken', refreshToken, { httpOnly: true })
+      .send({ message: 'Succesfully login', data: user})
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
   }
 
   @Get('/refetch')

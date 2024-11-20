@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Query, Put, Param, Delete} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Query, Put, Param, Delete, ParseIntPipe} from '@nestjs/common';
 import { PostService } from './post.service';
 import { PostAttributes } from 'src/utils/model/post.model';
 
@@ -21,12 +21,11 @@ export class PostController {
   @Put('/:id')
   @HttpCode(HttpStatus.CREATED)
   async editPost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number, 
     @Body() req: PostAttributes, 
     ): Promise<{ message: string }> {
     const userId = req?.user_id;
-    const postId = parseInt(id)
-    await this.postService.editPostService(req, postId, userId);
+    await this.postService.editPostService(req, id, userId);
     return {
       message: 'Successfully update post',
     };
@@ -48,10 +47,9 @@ export class PostController {
   @Get('/:id')
   @HttpCode(HttpStatus.OK)
   async getPost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number, 
   ): Promise<{ message: string, data: PostAttributes | null }> {
-    const postId = parseInt(id)
-    const result = await this.postService.getPostService(postId);
+    const result = await this.postService.getPostService(id);
     return {
       message: 'Successfully get post',
       data: result
@@ -61,12 +59,11 @@ export class PostController {
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
   async deletePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number, 
     @Body() req: PostAttributes, 
   ): Promise<{ message: string }> {
-    const postId = parseInt(id)
     const userId = req?.user_id;
-    await this.postService.deletePostService(postId, userId);
+    await this.postService.deletePostService(id, userId);
     return {
       message: 'Successfully delete post',
     };
@@ -75,10 +72,9 @@ export class PostController {
   @Get('/user/:user_id')
   @HttpCode(HttpStatus.OK)
   async getPostsByUser(
-    @Param('user_id') user_id: string,
+    @Param('user_id', ParseIntPipe) user_id: number, 
   ): Promise<{ message: string, data: PostAttributes | null }> {
-    const userID = parseInt(user_id)
-    const result = await this.postService.getPostsByUserService(userID);
+    const result = await this.postService.getPostsByUserService(user_id);
     return {
       message: 'Successfully get posts by user',
       data: result

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param, Delete, ParseIntPipe, UsePipes, ValidationPipe} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param, Delete, ParseIntPipe} from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentAttributes } from 'src/utils/model/comment.model';
 
