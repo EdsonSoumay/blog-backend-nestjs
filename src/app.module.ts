@@ -8,10 +8,10 @@ import { UploadFileMiddleware } from './middleware/uploadFile.middleware';
 import { FileController } from './file/file.controller';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { NextFunction, Response, Request } from 'express';
 import { RedisModule } from './redis/redis.module';
 import { CategoryModule } from './category/category.module';
 import { CommentModule } from './comment/comment.module';
+import { ErrorStaticRouteMiddleware } from './middleware/errorStaticRoute.middleware';
 
 @Module({
   imports: [
@@ -43,14 +43,7 @@ export class AppModule implements NestModule {
   
     // Tambahkan Middleware untuk menangkap error
     consumer
-    .apply((req:Request, res: Response, next: NextFunction) => {
-      res.on('finish', () => {
-        if (res.statusCode === 404) {
-          console.error(`Static file not found: ${req.originalUrl}`);
-        }
-      });
-      next();
-    })
+    .apply(ErrorStaticRouteMiddleware)
     .forRoutes('*');
  }
 }
