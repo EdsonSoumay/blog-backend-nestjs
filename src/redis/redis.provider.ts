@@ -1,7 +1,7 @@
 import { createClient, RedisClientType } from 'redis';
 
-let redisClient: RedisClientType | null = null; // Global variable untuk menyimpan client
-let isConnecting = false; // Untuk mencegah percobaan koneksi paralel
+let redisClient: RedisClientType | null = null;
+let isConnecting = false;
 
 export const RedisProvider = {
   provide: 'REDIS_CLIENT',
@@ -16,44 +16,40 @@ export const RedisProvider = {
       return null;
     }
 
-    isConnecting = true; // Tandai bahwa koneksi sedang dilakukan
+    isConnecting = true;
 
-    const maxRetries = 3;
-    const retryDelay = 5000; // 5 detik
-    let retries = 0;
+    try {
+      redisClient = createClient({
+        password: process.env.REDIS_PASSWORD,
+      });
 
-    while (retries < maxRetries) {
-      try {
-        redisClient = createClient({
-          password: process.env.REDIS_PASSWORD,
-        });
+      await redisClient.connect();
+      console.log('Redis connected successfully');
 
-        await redisClient.connect(); // Coba koneksi
-        console.log('Redis connected successfully');
+      redisClient.on('error', async (error) => {
+        console.error('Redis error:', error.message);
 
-        redisClient.on('error', (error) => {
-          console.error('error redis');
-          // retries++;
-          // console.error(`Failed to connect to Redis (attempt ${retries}/${maxRetries})`);
-        });
-
-        isConnecting = false; // Tandai koneksi berhasil
-        return redisClient;
-      } catch (error: any) {
-        retries++;
-        console.error(`Failed to connect to Redis (attempt ${retries}/${maxRetries}):`, error.message);
-
-        if (retries < maxRetries) {
-          console.log('Retrying to connect to Redis...');
-          await new Promise((resolve) => setTimeout(resolve, retryDelay)); // Tunggu sebelum mencoba ulang
-        } else {
-          console.error('Max retries reached. Redis will not be connected.');
+        if (error.message.includes('Socket closed unexpectedly')) {
+          console.warn('Socket closed. Reconnecting...');
+          if (redisClient) {
+            await redisClient.quit(); // Tutup koneksi
+            redisClient = null;
+          }
+          isConnecting = false;
+          await RedisProvider.useFactory(); // Panggil ulang untuk koneksi ulang
         }
-      }
-    }
+      });
 
-    isConnecting = false; // Tandai bahwa koneksi gagal setelah semua percobaan
-    redisClient = null;
-    return null;
+      redisClient.on('end', () => {
+        console.warn('Redis connection ended.');
+      });
+
+      isConnecting = false;
+      return redisClient;
+    } catch (error: any) {
+      console.error('Failed to connect to Redis:', error.message);
+      isConnecting = false;
+      return null;
+    }
   },
 };

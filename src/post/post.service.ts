@@ -7,6 +7,7 @@ import { handleValidationError } from 'src/utils/helpers/validationException.hel
 import { deleteImage, removePreviousImage } from 'src/utils/helpers/removeFile.helpers';
 import { SocketService } from 'src/common/socket/socket.service';
 import { RedisClientType } from 'redis';
+import { clearCacheRedis, isRedisConnected } from 'src/utils/helpers/redis.helpers';
 
 @Injectable()
 export class PostService {
@@ -17,39 +18,41 @@ export class PostService {
     @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType | null
   ){}
 
+
   //yang pake redis
-  // async getPostsService(search: string): Promise<any> {
-  //   try {
-  //     // Cek apakah hasil pencarian sudah ada di Redis
-  //     const cachedPosts = await this.redisClient.get(`posts:${search}`);
-  //     if (cachedPosts) {
-  //       // Jika ada, parsing hasilnya dan kembalikan
-  //       return JSON.parse(cachedPosts);
-  //     }
-
-  //     // Jika tidak ada, ambil dari repository
-  //     const posts = await this.postRepository.getPostsRepository(search);
-
-  //     // Simpan hasil pencarian ke Redis dengan TTL (misalnya 3600 detik)
-  //     await this.redisClient.set(`posts:${search}`, JSON.stringify(posts), {
-  //       EX: 3600, // 1 jam
-  //     });
-
-  //     return posts;
-  //   } catch (err) {
-  //     throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  // }
-
   async getPostsService(search: string): Promise<any> {
+    const isRedisClientOpen = await isRedisConnected(this.redisClient)
+    
+    // Buat cache key yang unik berdasarkan parameter pencarian
+    const searchStr = String(search || '').toLowerCase(); // Memastikan selalu string
+    const cacheKey = searchStr ? `posts:search:${searchStr}` : 'posts:all';
+
     try {
+      if (isRedisClientOpen) {
+        await this.redisClient.select(1); // Memilih database index 1
+        // Cek apakah data sudah ada di Redis
+        const cachedPosts = await this.redisClient.get(cacheKey);
+        if (cachedPosts) {
+          return JSON.parse(cachedPosts);
+        }
+      }
+
+      // Jika tidak ada, ambil dari repository
       const posts = await this.postRepository.getPostsRepository(search);
-      return posts
+  
+      if(isRedisClientOpen){
+        await this.redisClient.select(1); // Memilih database index 1
+        // Simpan data ke Redis untuk caching dengan TTL 300 detik (5 menit)
+        await this.redisClient.set(cacheKey, JSON.stringify(posts), {
+          EX: 300,
+        });
+      }
+  
+      return posts;
     } catch (err) {
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
 
   async createPostService(req: PostAttributes, userId: number) {
     try {
@@ -62,6 +65,10 @@ export class PostService {
         const resultByUser = await this.postRepository.getPostsByUserIdRepository(userId);
         this.socketService.emitEventToRoom(`userId-${userId}`, `${userId}-all-posts`, resultByUser);
       }
+
+      // Hapus cache untuk semua posts dan pencarian spesifik, jika ada
+      clearCacheRedis(this.redisClient, 'posts:*')
+
     } catch (err) {
       handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -88,6 +95,9 @@ export class PostService {
        const resultByUser = await this.postRepository.getPostsByUserIdRepository(userId);
        this.socketService.emitEventToRoom(`userId-${userId}`, `${userId}-all-posts`, resultByUser);
      }
+
+     // Hapus cache untuk semua posts dan pencarian spesifik, jika ada
+     clearCacheRedis(this.redisClient, 'posts:*')
     } catch (err) {
       handleValidationError(err)
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -106,6 +116,9 @@ export class PostService {
         const resultByUser = await this.postRepository.getPostsByUserIdRepository(userId);
         this.socketService.emitEventToRoom(`userId-${userId}`, `${userId}-all-posts`, resultByUser);
       }
+
+     // Hapus cache untuk semua posts dan pencarian spesifik, jika ada
+     clearCacheRedis(this.redisClient, 'posts:*')
     } catch (err) {
       throw new HttpException({ message: err.message }, HttpStatus.INTERNAL_SERVER_ERROR);
     }

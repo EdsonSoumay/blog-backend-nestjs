@@ -6,6 +6,17 @@ import cookieParser from 'cookie-parser';
 import { SocketService } from './common/socket/socket.service';
 
 async function bootstrap() {
+
+  // Tangani uncaughtException dan unhandledRejection
+  process.on('uncaughtException', (error) => {
+    console.error('Unhandled Exception:', error.message);
+    console.error(error.stack);
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
+  });
+
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const socketService = app.get(SocketService);

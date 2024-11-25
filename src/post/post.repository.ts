@@ -68,7 +68,12 @@ export class PostRepository {
     });
   }
 
-  async deletePostByIdRepository(postId:number): Promise<void>{
-     await this.prismaService.posts.delete({where:{id:postId}})
+  async deletePostByIdRepository(postId: number): Promise<void> {
+    console.log("postId:", postId);
+  
+    await this.prismaService.posts.delete({
+      where: { id: postId },
+    });
   }
+  
 }
